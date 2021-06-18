@@ -31,7 +31,7 @@ void mat2D_print(TMat2D * mat)
     printf("\nLinhas: %d, Colunas: %d\n", nrows, ncolumns);
     for(int i = 0; i<nrows; i++)
     {
-        for (int j = 0; j<ncolumns; j++)
+        for(int j = 0; j<ncolumns; j++)
         {
             if(mat2D_get_value(mat,i,j,&val) != 0)
                 printf("Erro!");
@@ -47,8 +47,9 @@ int mat2D_set_value(TMat2D *mat, int i, int j, int val)
     if(i >= mat->nrows || j >= mat->ncolumns)
         return -1;
 
-    int pos = i * mat->nrows + j;
+    int pos = i * mat->ncolumns + j;
     mat->data[pos] = val;
+    //printf("Coloquei na linha: %d, coluna: %d, o valor: %d, pos: %d\n",i,j,val,pos);
     return 0;
 }
 
@@ -59,7 +60,7 @@ int mat2D_get_value(TMat2D *mat, int i, int j, int *val)
     if(i >= mat->nrows || j >= mat->ncolumns)
         return -1;
 
-    int pos = i * mat->nrows + j;
+    int pos = i * mat->ncolumns + j;
     *val = mat->data[pos];
     return 0;
 }
@@ -109,136 +110,6 @@ TMat2D *mat2D_sum(TMat2D *mat1, TMat2D *mat2)
             pos = i * res->nrows + j;
             res->data[pos] = mat1->data[pos] + mat2->data[pos];
         }
-    }
-
-    return res;
-}
-
-TMat2D *mat2D_multiply(TMat2D *mat1, TMat2D *mat2)
-{
-    if (mat1 == NULL || mat2 == NULL)
-        return NULL;
-    /*if (mat1->nrows != mat2->ncolumns)
-        return NULL;*/
-
-    int pos, aux = 0;
-    int nrows = mat1->nrows;
-    int ncolumns = mat2->ncolumns;
-
-    TMat2D *res;
-    res = mat2D_create(nrows, ncolumns);
-
-    for (int i = 0; i < mat1->nrows; i++)
-    {
-        for (int j = 0; j < mat2->ncolumns; j++)
-        {
-            for (int x = 0; x < mat2->nrows; x++)
-            {
-                int pos1 = i * mat1->nrows + x;
-                int pos2 = x * mat2->nrows + j;
-                aux += mat1->data[pos1] * mat1->data[pos2];
-            }
-            pos = i * res->nrows + j;
-            res->data[pos] = aux;
-            aux = 0;
-        }
-    }
-
-    return res;
-}
-
-TMat2D *mat2D_multiply_N(TMat2D *mat, int mult)
-{
-    if (mat == NULL)
-        return NULL;
-
-    int pos;
-    int nrows = mat->nrows;
-    int ncolumns = mat->ncolumns;
-
-    TMat2D *res;
-    res = mat2D_create(nrows, ncolumns);
-
-    for (int i = 0; i < nrows; i++)
-    {
-        for (int j = 0; j < ncolumns; j++)
-        {
-            pos = i * res->nrows + j;
-            res->data[pos] = mat->data[pos] * mult;
-        }
-    }
-
-    return res;
-}
-
-int mat2D_diagonal(TMat2D *mat)
-{
-    if (mat == NULL)
-        return -1;
-
-    int ncolumns = mat->ncolumns;
-    int pos;
-    int soma = 0;
-
-    int i, j;
-    for (i = 0, j = 0; j < ncolumns; i++, j++)
-    {       
-        pos = i * mat->nrows + j;
-        soma += mat->data[pos];      
-    }
-
-    return soma;
-}
-
-TMat2D *mat2D_sum_rows(TMat2D *mat)
-{
-    if (mat == NULL)
-        return NULL;
-
-    int pos;
-    int nrows = mat->nrows;
-    int ncolumns = mat->ncolumns;
-
-    TMat2D *res;
-    res = mat2D_create(1, nrows);
-
-    int aux = 0;
-    for (int i = 0; i < nrows; i++)
-    {
-        for (int j = 0; j < ncolumns; j++)
-        {
-            pos = i * mat->nrows + j;
-            aux += mat->data[pos];
-        }
-        res->data[i] = aux;
-        aux = 0;
-    }
-
-    return res;
-}
-
-TMat2D *mat2D_sum_columns(TMat2D *mat)
-{
-    if (mat == NULL)
-        return NULL;
-
-    int pos;
-    int nrows = mat->nrows;
-    int ncolumns = mat->ncolumns;
-
-    TMat2D *res;
-    res = mat2D_create(1, ncolumns);
-
-    int aux = 0;
-    for (int i = 0; i < ncolumns; i++)
-    {
-        for (int j = 0; j < nrows; j++)
-        {
-            pos = j * mat->ncolumns + i;
-            aux += mat->data[pos];
-        }
-        res->data[i] = aux;
-        aux = 0;
     }
 
     return res;

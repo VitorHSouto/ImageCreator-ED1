@@ -16,14 +16,12 @@ int main(int argc, char *argv[])
 
 	if(strcmp(argv[1], "-open") == 0)
 	{
-		ErrorManager(open_file(&arq,argv[2]), "Arquivo iniciado!");
-		show_image(&arq);
+		ErrorManager(open_file(&arq,argv[2]), "\nArquivo iniciado!\n");
+		//show_image(&arq);
 	}
 	else if(strcmp(argv[1], "-convert") == 0)
 	{
-		ErrorManager(open_file(&arq,argv[2]), "Arquivo .txt iniciado!\n");
-		ErrorManager(open_file(&arq2,argv[3]), "Arquivo .imm iniciado!\n");
-		ErrorManager(convert_file(&arq,&arq2), "Arquivo Convertido!\n");
+		ErrorManager(convert_file(argv[2],argv[3]), "Arquivo Convertido!\n");
 	}
 	else if(strcmp(argv[1], "-ler") == 0)
 	{

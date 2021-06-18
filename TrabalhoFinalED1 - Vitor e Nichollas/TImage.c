@@ -15,6 +15,7 @@ int open_file(FILE **fp, char* arg)
         *fp = fopen(arg,"r+");
         if (*fp == NULL)
             return INVALID_FILE;
+        show_image(fp);
     }
     else if(arg[length]=='i')
     {
@@ -26,27 +27,35 @@ int open_file(FILE **fp, char* arg)
     return SUCCESS;
 }
 
-int convert_file(FILE **fpT, FILE **fpB)
+int convert_file(char* texto, char* binario)
 {
+    FILE *fpT, *fpB;
+    fpT = fopen(texto,"r+");
+        if (fpT == NULL)
+            return INVALID_FILE;
+    fpB = fopen(binario,"wb");
+        if (fpT == NULL)
+            return INVALID_FILE;
+
     TMat2D* mat;
-    mat = image_create(fpT);
+    mat = image_create(&fpT);
     if(mat==NULL)
         return INVALID_NULL_POINTER;
 
     int val;
     int nrows, ncol;
     mat2D_info(mat,&nrows,&ncol);
-    //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncol);
+    printf("\nLinhas: %d, Colunas: %d\n", nrows, ncol);
 
-    fwrite(&nrows, sizeof(int), 1, *fpB);
-    fwrite(&ncol, sizeof(int), 1, *fpB);
+    fwrite(&nrows, sizeof(int), 1, fpB);
+    fwrite(&ncol, sizeof(int), 1, fpB);
 
     for(int i = 0; i<nrows; i++)
     {
         for (int j = 0; j<ncol; j++)
         {
             mat2D_get_value(mat,i,j,&val);
-            fwrite(&val, sizeof(int), 1, *fpB);
+            fwrite(&val, sizeof(int), 1, fpB);
         }
     }
 
@@ -65,28 +74,27 @@ TMat2D* image_create(FILE **fp)
             nrows+=1;
             ncol=0;
         }
-        else if(c=='0'||c=='1')
+        else if(c==' ')
             ncol+=1;
 
-    }nrows++;
+    }nrows++; ncol++;
 
     TMat2D* mat;
     mat = mat2D_create(nrows,ncol);
     rewind(*fp);
 
-    int i=0, j=0;
-    while((c = fgetc(*fp)) != EOF)
-    {
-        if(c==' ') j++;          //Se não for número
-        else if(c=='\n'){ i++; j=0;}    //Se não for número
-        else 
+    while(!feof(*fp)) {
+        for (int i = 0; i < nrows; i++)
         {
-            char *p = &c;
-            val = atoi(p);
-            //printf("%d, ",val);
-            mat2D_set_value(mat,i,j,val);
-        }
-    }
+            for (int j = 0; j < ncol; j++)
+            {
+                fscanf(*fp,"%d",&val);
+                //printf("Linha: %d, Coluna: %d, Valor: %d\n", i,j,val);
+                mat2D_set_value(mat,i,j,val);
+            }
+            
+        }     
+	}
 
     return mat;
 }

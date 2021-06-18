@@ -6,4 +6,4 @@
 int open_file(FILE **fp, char* arg);
 int show_image(FILE **fp);
 TMat2D* image_create(FILE **fp);
-int convert_file(FILE **fpT, FILE **fpB);
+int convert_file(char* texto, char* binario);

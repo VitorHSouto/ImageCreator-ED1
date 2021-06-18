@@ -29,6 +29,43 @@ int open_file(char* arg)
     return SUCCESS;
 }
 
+int convert_file(char* texto, char* binario)
+{
+    FILE *fpT, *fpB;
+    fpT = fopen(texto,"r+");
+        if (fpT == NULL)
+            return INVALID_FILE;
+    fpB = fopen(binario,"wb");
+        if (fpB == NULL)
+            return INVALID_FILE;
+
+    TMat2D* mat;
+    mat = image_create(&fpT);
+    if(mat==NULL)
+        return INVALID_NULL_POINTER;
+
+    int val;
+    int nrows, ncol;
+    mat2D_info(mat,&nrows,&ncol);
+    printf("\nLinhas: %d, Colunas: %d\n", nrows, ncol);
+
+    fwrite(&nrows, sizeof(int), 1, fpB);
+    fwrite(&ncol, sizeof(int), 1, fpB);
+
+    for(int i = 0; i<nrows; i++)
+    {
+        for (int j = 0; j<ncol; j++)
+        {
+            mat2D_get_value(mat,i,j,&val);
+            fwrite(&val, sizeof(int), 1, fpB);
+        }
+    }
+    fclose(fpT);
+    fclose(fpB);
+
+    return SUCCESS;    
+}
+
 TMat2D* image_create(FILE **fp)
 {
     int nrows = 0, ncol = 0, val;
@@ -91,6 +128,9 @@ int show_image_bin(char* arg)
     int v, nrows, ncols;
     fread(&nrows,sizeof(int),1,fp);
     fread(&ncols,sizeof(int),1,fp);
+
+    printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
+
     for (int i = 0; i < nrows; i++)
     {
         for (int j = 0; j < ncols; j++)

@@ -15,6 +15,11 @@ int main(int argc, char *argv[])
 		ErrorManager(
 			open_file(argv[2]), "\nArquivo iniciado!\n");
 	}
+    else if(strcmp(argv[1], "-convert") == 0)
+	{
+		ErrorManager(
+			convert_file(argv[2],argv[3]), "Arquivo Convertido!\n");
+	}
     else
     {
         printf("Comando Invalido!\n");

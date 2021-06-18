@@ -140,3 +140,40 @@ int show_image_bin(char* arg)
         } printf("\n");		
     }
 }
+
+int segment_image(char* thrStr, char* file, char* segFile)
+{
+    FILE *fp;
+    fp = fopen(file,"rb");
+    if (fp == NULL)
+        return INVALID_FILE;
+
+    FILE *segFp;
+    segFp = fopen(segFile,"wb");
+    if (segFp == NULL)
+        return INVALID_FILE;
+
+    int thr = atoi(thrStr);
+    int v, val, nrows, ncols;
+    fread(&nrows,sizeof(int),1,fp); fwrite(&nrows,sizeof(int),1,segFp);
+    fread(&ncols,sizeof(int),1,fp); fwrite(&ncols,sizeof(int),1,segFp);
+
+    printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
+
+    for (int i = 0; i < nrows; i++)
+    {
+        for (int j = 0; j < ncols; j++)
+        {
+            fread(&v,sizeof(int),1,fp);
+
+            if(v>=thr) val = 1;
+            else val = 0;    
+            
+            fwrite(&val, sizeof(int), 1, segFp);
+
+        } printf("\n");		
+    }
+
+    fclose(fp);
+    fclose(segFp);
+}

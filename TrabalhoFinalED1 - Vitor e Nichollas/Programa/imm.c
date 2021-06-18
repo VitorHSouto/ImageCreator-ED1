@@ -20,6 +20,11 @@ int main(int argc, char *argv[])
 		ErrorManager(
 			convert_file(argv[2],argv[3]), "Arquivo Convertido!\n");
 	}
+    else if(strcmp(argv[1], "-segment") == 0)
+	{
+		ErrorManager(
+            segment_image(argv[2],argv[3],argv[4]), "Arquivo Convertido!\n");
+	}
     else
     {
         printf("Comando Invalido!\n");

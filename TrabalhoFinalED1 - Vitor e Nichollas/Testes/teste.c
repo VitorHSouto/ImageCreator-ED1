@@ -26,6 +26,10 @@ int main(int argc, char *argv[])
 	{
 		segfile(argv[2],argv[3]);
 	}	
+	else if(strcmp(argv[1], "-lab") == 0)
+	{
+		labfile(argv[2],argv[3]);
+	}
 }
 
 void ErrorManager(int error, char mensage[50])

@@ -180,6 +180,142 @@ int segfile(char* texto, char* binario)
     return SUCCESS;
 }
 
+int labfile(char* texto, char* binario)
+{
+    FILE *fp;
+    fp = fopen(texto,"r+");
+    if (fp == NULL)
+        return INVALID_FILE;
+
+    FILE *segFp;
+    segFp = fopen(binario,"w+");
+    if (segFp == NULL)
+        return INVALID_FILE;
+
+    int v, val, nrows, ncols;
+
+    TMat2D* im;
+    im = image_create(&fp);
+    if(im==NULL)
+        return INVALID_NULL_POINTER;
+    mat2D_info(im,&nrows,&ncols);
+
+    TMat2D* im_root;
+    im_root = mat2D_create(nrows,ncols);
+
+    Stack* lista;
+    lista = stack_create(100);
+
+    Ponto p, p_atual;
+    int val_im, val_im_root;
+    int label=1;
+
+    for (int i = 1; i < nrows-1; i++)
+    {
+        for (int j = 1; j < ncols-1; j++)
+        {
+            p.x = i;
+            p.y = j;
+            mat2D_get_value(im, p.x, p.y, &val_im);
+            mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+            if(val_im == 2 && (val_im_root!=3 && val_im_root!=1))
+            {
+                mat2D_set_value(im_root,p.x,p.y,1);
+                stack_push(lista,p);
+                while(!stack_empty(lista))
+                {
+                    stack_top(lista,&p_atual);
+                    //stack_pop(lista);
+                    int vizinho = 0;
+                    //////////////////////////////
+                    p.x = p_atual.x - 1;
+                    p.y = p_atual.y;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 2 && (val_im_root!=3 && val_im_root!=1))
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, 1);
+                        stack_push(lista,p);
+                        vizinho = 1;
+                        printf("ENTREI! Linha: %d, Coluna: %d\n", p.x, p.y);
+                        if(p.x==1 && p.y == 8)
+                        {
+                            printf("SAIIII!!!\n\n\n\n");
+                            mat2D_print(im_root);
+                            return 0;
+                        }
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x + 1;
+                    p.y = p_atual.y;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 2 && (val_im_root!=3 && val_im_root!=1))
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, 1);
+                        stack_push(lista,p);
+                        vizinho = 1;
+                        printf("ENTREI! Linha: %d, Coluna: %d\n", p.x, p.y);
+                        if(p.x==1 && p.y == 8)
+                        {
+                            printf("SAIIII!!!\n\n\n\n");
+                            mat2D_print(im_root);
+                            return 0;
+                        }
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x;
+                    p.y = p_atual.y - 1;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 2 && (val_im_root!=3 && val_im_root!=1))
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, 1);
+                        stack_push(lista,p);
+                        vizinho = 1;
+                        printf("ENTREI! Linha: %d, Coluna: %d\n", p.x, p.y);
+                        if(p.x==1 && p.y == 8)
+                        {
+                            printf("SAIIII!!!\n\n\n\n");
+                            mat2D_print(im_root);
+                            return 0;
+                        }
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x;
+                    p.y = p_atual.y + 1;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 2 && (val_im_root!=3 && val_im_root!=1))
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, 1);
+                        stack_push(lista,p);
+                        vizinho = 1;
+                        printf("ENTREI! Linha: %d, Coluna: %d\n", p.x, p.y);
+                        if(p.x==1 && p.y == 8)
+                        {
+                            printf("SAIIII!!!\n\n\n\n");
+                            mat2D_print(im_root);
+                            return 0;
+                        }
+                    }
+                    if(!vizinho)
+                    {
+                        printf("Linha: %d, Coluna: %d APAGADA!\n", p_atual.x, p_atual.y);
+                        stack_pop(lista);
+                        mat2D_set_value(im_root, p_atual.x, p_atual.y, 3);
+                    }
+                }
+            }
+        }
+    }
+
+    mat2D_print(im_root);
+}
+
 TMat2D* image_create(FILE **fp)
 {
     int nrows = 0, ncol = 0, val;

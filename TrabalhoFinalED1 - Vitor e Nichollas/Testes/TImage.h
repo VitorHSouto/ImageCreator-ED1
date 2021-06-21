@@ -2,6 +2,7 @@
 #define INVALID_NULL_POINTER -1
 #define INVALID_FILE -5
 #include "TMat2D.h"
+#include "TQueue.h"
 
 int open_file(char* arg);
 int show_image(FILE **fp);

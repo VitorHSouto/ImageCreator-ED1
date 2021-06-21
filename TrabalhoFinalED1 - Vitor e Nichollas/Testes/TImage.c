@@ -72,20 +72,22 @@ int segfile(char* texto, char* binario)
     if (fp == NULL)
         return INVALID_FILE;
 
-    /*FILE *segFp;
+    FILE *segFp;
     segFp = fopen(binario,"wb");
     if (segFp == NULL)
-        return INVALID_FILE;*/
+        return INVALID_FILE;
 
     int v, val, nrows, ncols;
-    /*fread(&nrows,sizeof(int),1,fp); //fwrite(&nrows,sizeof(int),1,segFp);
-    fread(&ncols,sizeof(int),1,fp); //fwrite(&ncols,sizeof(int),1,segFp);*/
 
     TMat2D* im;
     im = image_create(&fp);
     if(im==NULL)
         return INVALID_NULL_POINTER;
     mat2D_info(im,&nrows,&ncols);
+
+    fread(&nrows,sizeof(int),1,fp); fwrite(&nrows,sizeof(int),1,segFp);
+    fread(&ncols,sizeof(int),1,fp); fwrite(&ncols,sizeof(int),1,segFp);
+    printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
 
     TMat2D* im_root;
     im_root = mat2D_create(nrows,ncols);
@@ -164,7 +166,16 @@ int segfile(char* texto, char* binario)
         } 
     }
 
-    mat2D_print(im_root);
+    for(int a = 0; a<nrows; a++)
+    {
+        for (int b = 0; b<ncols; b++)
+        {
+            mat2D_get_value(im_root,a,b,&val);
+            fwrite(&val, sizeof(int), 1, segFp);
+        }
+    }
+    fclose(fp);
+    fclose(segFp);
 
     return SUCCESS;
 }

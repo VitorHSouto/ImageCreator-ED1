@@ -22,6 +22,10 @@ int main(int argc, char *argv[])
 		ErrorManager(
 			convert_file(argv[2],argv[3]), "Arquivo Convertido!\n");
 	}	
+	else if(strcmp(argv[1], "-cc") == 0)
+	{
+		segfile(argv[2],argv[3]);
+	}	
 }
 
 void ErrorManager(int error, char mensage[50])

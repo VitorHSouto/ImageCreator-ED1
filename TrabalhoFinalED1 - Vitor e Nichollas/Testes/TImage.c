@@ -65,6 +65,110 @@ int convert_file(char* texto, char* binario)
     return SUCCESS;    
 }
 
+int segfile(char* texto, char* binario)
+{
+    FILE *fp;
+    fp = fopen(texto,"r+");
+    if (fp == NULL)
+        return INVALID_FILE;
+
+    /*FILE *segFp;
+    segFp = fopen(binario,"wb");
+    if (segFp == NULL)
+        return INVALID_FILE;*/
+
+    int v, val, nrows, ncols;
+    /*fread(&nrows,sizeof(int),1,fp); //fwrite(&nrows,sizeof(int),1,segFp);
+    fread(&ncols,sizeof(int),1,fp); //fwrite(&ncols,sizeof(int),1,segFp);*/
+
+    TMat2D* im;
+    im = image_create(&fp);
+    if(im==NULL)
+        return INVALID_NULL_POINTER;
+    mat2D_info(im,&nrows,&ncols);
+
+    TMat2D* im_root;
+    im_root = mat2D_create(nrows,ncols);
+
+    TQueue* lista_proximos;
+    lista_proximos = queue_create();
+
+    ponto p, p_atual;
+    int val_im, val_im_root;
+    int label=1;
+
+    for (int i = 1; i < nrows-1; i++)
+    {
+        for (int j = 0; j < ncols-1; j++)
+        {
+            p.x = i;
+            p.y = j;
+            mat2D_get_value(im, p.x, p.y, &val_im);
+            mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+            if(val_im==1 && val_im_root==0)
+            {
+                mat2D_set_value(im_root, p.x, p.y, label);
+                queue_push(lista_proximos,p);
+
+                while (!queue_empty(lista_proximos))
+                {
+                    queue_top(lista_proximos,&p_atual);
+                    queue_pop(lista_proximos);
+
+                    //////////////////////////////
+                    p.x = p_atual.x - 1;
+                    p.y = p_atual.y;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 1 && val_im_root==0)
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, label);
+                        queue_push(lista_proximos,p);
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x + 1;
+                    p.y = p_atual.y;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 1 && val_im_root==0)
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, label);
+                        queue_push(lista_proximos,p);
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x;
+                    p.y = p_atual.y - 1;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 1 && val_im_root==0)
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, label);
+                        queue_push(lista_proximos,p);
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x;
+                    p.y = p_atual.y + 1;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 1 && val_im_root==0)
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, label);
+                        queue_push(lista_proximos,p);
+                    }
+                }
+                label += 1; 
+            }
+        } 
+    }
+
+    mat2D_print(im_root);
+
+    return SUCCESS;
+}
+
 TMat2D* image_create(FILE **fp)
 {
     int nrows = 0, ncol = 0, val;
@@ -81,6 +185,8 @@ TMat2D* image_create(FILE **fp)
             ncol+=1;
 
     }nrows++; ncol++;
+
+    printf("Linhas: %d, Colunas: %d\n", nrows, ncol);
 
     TMat2D* mat;
     mat = mat2D_create(nrows,ncol);

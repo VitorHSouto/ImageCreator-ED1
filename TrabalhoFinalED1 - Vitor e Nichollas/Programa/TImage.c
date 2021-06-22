@@ -33,12 +33,9 @@ int open_file(char* arg)
 
 int convert_file(char* texto, char* binario)
 {
-    FILE *fpT, *fpB;
+    FILE *fpT;
     fpT = fopen(texto,"r+");
         if (fpT == NULL)
-            return INVALID_FILE;
-    fpB = fopen(binario,"wb");
-        if (fpB == NULL)
             return INVALID_FILE;
 
     TMat2D* mat;
@@ -51,19 +48,8 @@ int convert_file(char* texto, char* binario)
     mat2D_info(mat,&nrows,&ncol);
     //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncol);
 
-    fwrite(&nrows, sizeof(int), 1, fpB);
-    fwrite(&ncol, sizeof(int), 1, fpB);
-
-    for(int i = 0; i<nrows; i++)
-    {
-        for (int j = 0; j<ncol; j++)
-        {
-            mat2D_get_value(mat,i,j,&val);
-            fwrite(&val, sizeof(int), 1, fpB);
-        }
-    }
+    write_bin(binario,mat);
     fclose(fpT);
-    fclose(fpB);
 
     return SUCCESS;    
 }
@@ -179,20 +165,47 @@ int segment_image(char* thrStr, char* file, char* segFile)
     return SUCCESS;
 }
 
-int segfile(char* texto, char* binario)
+TMat2D* image_create_bin(char* arg)
 {
     FILE *fp;
-    fp = fopen(texto,"r+");
+    fp = fopen(arg,"rb");
     if (fp == NULL)
-        return INVALID_FILE;
+        return NULL;
 
-    int v, val, nrows, ncols;
+    int v, nrows, ncols;
+
+    fread(&nrows,sizeof(int),1,fp);
+    fread(&ncols,sizeof(int),1,fp);
+
+    TMat2D* mat;
+    mat = mat2D_create(nrows,ncols);
+
+
+    for (int i = 0; i < nrows; i++)
+    {
+        for (int j = 0; j < ncols; j++)
+        {
+            fread(&v,sizeof(int),1,fp);
+            mat2D_set_value(mat,i,j,v);
+        }
+    }
+
+    //mat2D_print(mat);
+    fclose(fp);
+
+    return mat;
+}
+
+int segfile(char* texto, char* binario)
+{
+    int v, val, nrows, ncols;  
 
     TMat2D* im;
-    im = image_create(&fp);
+    im = image_create_bin(texto);
     if(im==NULL)
         return INVALID_NULL_POINTER;
     mat2D_info(im,&nrows,&ncols);
+    mat2D_print(im);
 
     //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
 
@@ -273,8 +286,8 @@ int segfile(char* texto, char* binario)
         } 
     }
 
+    mat2D_print(im_root);
     write_bin(binario,im_root);
-    fclose(fp);
 
     return SUCCESS;
 }

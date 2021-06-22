@@ -13,3 +13,4 @@ int segfile(char* texto, char* binario);
 int write_bin(char* arg, TMat2D* mat);
 int labfile(char* texto, char* binario);
 int write_txt(char* arg, TMat2D* mat);
+TMat2D* image_create_bin(char* arg);

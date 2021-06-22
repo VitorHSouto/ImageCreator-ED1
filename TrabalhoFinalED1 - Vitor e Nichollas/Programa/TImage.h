@@ -14,3 +14,4 @@ int write_bin(char* arg, TMat2D* mat);
 int labfile(char* texto, char* binario);
 int write_txt(char* arg, TMat2D* mat);
 TMat2D* image_create_bin(char* arg);
+int correct_infos(TMat2D** mat);

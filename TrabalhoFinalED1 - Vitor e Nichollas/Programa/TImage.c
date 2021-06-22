@@ -439,6 +439,8 @@ int labfile(char* text, char* res)
         }
     }
 
+    correct_infos(&im_root);
+    //mat2D_print(im_root);
     write_txt(res,im_root);
 
     return SUCCESS;
@@ -464,11 +466,11 @@ int write_txt(char* arg, TMat2D* mat)
             mat2D_get_value(mat,a,b,&val);
 
             if(val==2) fprintf(segFp, "%d", val);
-            else if(val==3) fprintf(segFp, "1");
+            else if(val==3||val==1) fprintf(segFp, "1");
             else fprintf(segFp, "0");
 
             if(b!=ncols-1) fprintf(segFp, " ");
-        }fprintf(segFp, "\n");
+        }if(a!=nrows-1)fprintf(segFp, "\n");
     }
 
     //mat2D_print(mat);
@@ -476,4 +478,34 @@ int write_txt(char* arg, TMat2D* mat)
 
     return SUCCESS;
 
+}
+
+int correct_infos(TMat2D** mat)
+{
+    int nrows, ncols, val, aux, neighbor;
+    mat2D_info(*mat,&nrows,&ncols);
+
+    for(int a = 0; a<nrows; a++)
+    {
+        for (int b = 0; b<ncols; b++)
+        {
+            mat2D_get_value(*mat,a,b,&val);
+            neighbor=0;
+            if(val==2 && (a!=0 && b!=0))
+            {
+                aux=a-1;
+                mat2D_get_value(*mat,aux,b,&val); if(val==2) neighbor++;
+                aux=a+1;
+                mat2D_get_value(*mat,aux,b,&val); if(val==2) neighbor++;
+                aux=b-1;
+                mat2D_get_value(*mat,a,aux,&val); if(val==2) neighbor++;
+                aux=b+1;
+                mat2D_get_value(*mat,a,aux,&val); if(val==2) neighbor++;
+                if(neighbor<2)
+                    mat2D_set_value(*mat,a,b,1);
+            }
+        }
+    }
+
+    return SUCCESS;
 }

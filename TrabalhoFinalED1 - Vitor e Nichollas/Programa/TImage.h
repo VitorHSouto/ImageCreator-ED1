@@ -11,3 +11,5 @@ int show_image_bin(char* arg);
 int segment_image(char* thr, char* file, char* segFile);
 int segfile(char* texto, char* binario);
 int write_bin(char* arg, TMat2D* mat);
+int labfile(char* texto, char* binario);
+int write_txt(char* arg, TMat2D* mat);

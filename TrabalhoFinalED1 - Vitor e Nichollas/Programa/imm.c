@@ -23,12 +23,17 @@ int main(int argc, char *argv[])
     else if(strcmp(argv[1], "-segment") == 0)
 	{
 		ErrorManager(
-            segment_image(argv[2],argv[3],argv[4]), "Arquivo Convertido!\n");
+            segment_image(argv[2],argv[3],argv[4]), "Imagem segmentada!\n");
 	}
 	else if(strcmp(argv[1], "-cc") == 0)
 	{
 		ErrorManager(
-			segfile(argv[2],argv[3]), "Arquivo Convertido!\n");
+			segfile(argv[2],argv[3]), "Componentes conexos detectados!\n");
+	}
+	else if(strcmp(argv[1], "-lab") == 0)
+	{
+		ErrorManager(
+			labfile(argv[2],argv[3]), "Resolucao criada!\n");
 	}
     else
     {

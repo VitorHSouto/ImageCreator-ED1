@@ -3,6 +3,7 @@
 #include <string.h>
 #include "TImage.h"
 #include "TQueue.h"
+#include "TStack.h"
 
 int open_file(char* arg)
 {
@@ -308,4 +309,179 @@ int write_bin(char* arg, TMat2D* mat)
     fclose(segFp);
 
     return SUCCESS;
+}
+
+int labfile(char* text, char* res)
+{
+    FILE *fp;
+    fp = fopen(text,"r+");
+    if (fp == NULL)
+        return INVALID_FILE;
+
+    int v, val, val_root, nrows, ncols;
+
+    TMat2D* im;
+    im = image_create(&fp);
+    if(im==NULL)
+        return INVALID_NULL_POINTER;
+    mat2D_info(im,&nrows,&ncols);
+
+    TMat2D* im_root;
+    im_root = mat2D_create(nrows,ncols);
+
+    Stack* lista;
+    lista = stack_create(100);
+
+    Ponto p, p_atual;
+    int val_im, val_im_root;
+    int label=1;
+
+    for (int i = 0; i < nrows; i++)
+    {
+        for (int j = 0; j < ncols; j++)
+        {
+            p.x = i;
+            p.y = j;
+            mat2D_get_value(im, p.x, p.y, &val_im);
+            mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+            if(val_im == 1 && (val_im_root!=3 && val_im_root!=2))
+            {
+                mat2D_set_value(im_root, p.x, p.y,2);
+                stack_push(lista,p);
+
+                
+                if(p_atual.x==0 && p_atual.y == ncols-1)
+                    break;
+
+                while(!stack_empty(lista))
+                {
+                    stack_top(lista,&p_atual);
+                    int vizinho = 0;
+
+                    
+                    if(p_atual.x==0 && p_atual.y == ncols-1)
+                        break;
+
+                    /////////ESQUERDA/////////////////////
+                    if(p_atual.x - 1 >= 0)
+                    {
+                        p.x = p_atual.x - 1;
+                        p.y = p_atual.y;
+                        mat2D_get_value(im, p.x, p.y, &val_im);
+                        mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                        if(val_im == 1 && (val_im_root!=3 && val_im_root!=2))
+                        {
+                            mat2D_set_value(im_root, p.x, p.y, 2);
+                            stack_push(lista,p);
+                            vizinho = 1;
+                            if(p.x==0 && p.y == ncols-1)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    ////////DIREITA//////////////////////
+                    if(p_atual.x - 1 <= nrows-1)
+                    {
+                        p.x = p_atual.x + 1;
+                        p.y = p_atual.y;
+                        mat2D_get_value(im, p.x, p.y, &val_im);
+                        mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                        if(val_im == 1 && (val_im_root!=3 && val_im_root!=2))
+                        {
+                            mat2D_set_value(im_root, p.x, p.y, 2);
+                            stack_push(lista,p);
+                            vizinho = 1;
+                            if(p.x==0 && p.y == ncols-1)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    ////////BAIXO//////////////////////
+                    if(p_atual.y - 1 >= 0)
+                    {
+                        p.x = p_atual.x;
+                        p.y = p_atual.y - 1;
+                        mat2D_get_value(im, p.x, p.y, &val_im);
+                        mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                        if(val_im == 1 && (val_im_root!=3 && val_im_root!=2))
+                        {
+                            mat2D_set_value(im_root, p.x, p.y, 2);
+                            stack_push(lista,p);
+                            vizinho = 1;
+                            if(p.x==0 && p.y == ncols-1)
+                            {
+                                break;
+                            }
+                        }
+                    }
+
+                    ////////CIMA//////////////////////
+                    if(p_atual.y + 1 <= ncols-1)
+                    {
+                        p.x = p_atual.x;
+                        p.y = p_atual.y + 1;
+                        mat2D_get_value(im, p.x, p.y, &val_im);
+                        mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                        if(val_im == 1 && (val_im_root!=3 && val_im_root!=2))
+                        {
+                            mat2D_set_value(im_root, p.x, p.y, 2);
+                            stack_push(lista,p);
+                            vizinho = 1;
+                            if(p.x==0 && p.y == ncols-1)
+                            {
+                                break;
+                            }
+                        }
+                    }       
+
+                    if(!vizinho)
+                    {
+                        stack_pop(lista);
+                        mat2D_set_value(im_root, p_atual.x, p_atual.y, 3);
+                    }
+                }
+            }
+        }
+    }
+
+    write_txt(res,im_root);
+    fclose(fp);
+
+    return SUCCESS;
+}
+
+int write_txt(char* arg, TMat2D* mat)
+{
+    if(mat==NULL)
+        return INVALID_NULL_POINTER;
+
+    FILE *segFp;
+    segFp = fopen(arg,"w+");
+    if (segFp == NULL)
+        return INVALID_FILE;
+
+    int nrows, ncols, val;
+    mat2D_info(mat,&nrows,&ncols);
+
+    for(int a = 0; a<nrows; a++)
+    {
+        for (int b = 0; b<ncols; b++)
+        {
+            mat2D_get_value(mat,a,b,&val);
+
+            if(val==2) fprintf(segFp, "%d", val);
+            else if(val==3) fprintf(segFp, "1");
+            else fprintf(segFp, "0");
+
+            if(b!=ncols-1) fprintf(segFp, " ");
+        }fprintf(segFp, "\n");
+    }
+
+    mat2D_print(mat);
+    fclose(segFp);
+
 }

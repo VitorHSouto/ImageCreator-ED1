@@ -108,25 +108,14 @@ int show_image(FILE **fp)
 
 int show_image_bin(char* arg)
 { 
-    FILE *fp;
-    fp = fopen(arg,"rb");
-    if (fp == NULL)
-        return INVALID_FILE;
-    
-    int v, nrows, ncols;
-    fread(&nrows,sizeof(int),1,fp);
-    fread(&ncols,sizeof(int),1,fp);
+    TMat2D* mat;
+    mat = image_create_bin(arg);
+    if(mat==NULL)
+        return INVALID_NULL_POINTER;
 
-    printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
+    mat2D_print(mat);
 
-    for (int i = 0; i < nrows; i++)
-    {
-        for (int j = 0; j < ncols; j++)
-        {
-            fread(&v,sizeof(int),1,fp);
-            printf("%3d ",v);
-        } printf("\n");		
-    }
+    return 0;
 }
 
 int segment_image(char* thrStr, char* file, char* segFile)
@@ -205,7 +194,7 @@ int segfile(char* texto, char* binario)
     if(im==NULL)
         return INVALID_NULL_POINTER;
     mat2D_info(im,&nrows,&ncols);
-    mat2D_print(im);
+    //mat2D_print(im);
 
     //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
 

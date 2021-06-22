@@ -12,3 +12,4 @@ int convert_file(char* texto, char* binario);
 int show_image_bin(char* arg);
 int segfile(char* texto, char* binario);
 int labfile(char* texto, char* binario);
+int write_txt(char* arg, TMat2D* mat);

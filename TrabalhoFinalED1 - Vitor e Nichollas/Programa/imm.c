@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	}
     else
     {
-        printf("Comando Invalido!\n");
+        printf("Erro, comando Invalido!\n");
         exit;
     }
 }

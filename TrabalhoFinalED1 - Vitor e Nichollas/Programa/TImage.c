@@ -82,6 +82,7 @@ TMat2D* image_create(char* arg)
         }     
 	}
 
+    fclose(fp);
     return mat;
 }
 
@@ -114,18 +115,19 @@ int show_image_bin(char* arg)
 
 int segment_image(char* thrStr, char* file, char* segFile)
 {
-    FILE *fp;
-    fp = fopen(file,"rb");
-    if (fp == NULL)
-        return INVALID_FILE;
-
     int thr = atoi(thrStr);
     int v, val, nrows, ncols;
-    fread(&nrows,sizeof(int),1,fp);
-    fread(&ncols,sizeof(int),1,fp);
 
     TMat2D* mat;
-    mat = mat2D_create(nrows,ncols);
+    mat = image_create_bin(file);
+    if(mat==NULL)
+        return INVALID_NULL_POINTER;
+    mat2D_info(mat,&nrows,&ncols);
+
+    TMat2D* matRes;
+    matRes = mat2D_create(nrows,ncols);
+    if(matRes==NULL)
+        return INVALID_NULL_POINTER;
 
     //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
 
@@ -133,17 +135,16 @@ int segment_image(char* thrStr, char* file, char* segFile)
     {
         for (int j = 0; j < ncols; j++)
         {
-            fread(&v,sizeof(int),1,fp);
+            mat2D_get_value(mat,i,j,&v);
 
             if(v>=thr) val = 1;
             else val = 0;    
             
-            mat2D_set_value(mat,i,j,val);
+            mat2D_set_value(matRes,i,j,val);
         }	
     }
 
-    write_bin(segFile, mat);
-    fclose(fp);
+    write_bin(segFile, matRes);
 
     return SUCCESS;
 }
@@ -472,5 +473,7 @@ int write_txt(char* arg, TMat2D* mat)
 
     //mat2D_print(mat);
     fclose(segFp);
+
+    return SUCCESS;
 
 }

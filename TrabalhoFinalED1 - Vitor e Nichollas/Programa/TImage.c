@@ -49,7 +49,7 @@ int convert_file(char* texto, char* binario)
     int val;
     int nrows, ncol;
     mat2D_info(mat,&nrows,&ncol);
-    printf("\nLinhas: %d, Colunas: %d\n", nrows, ncol);
+    //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncol);
 
     fwrite(&nrows, sizeof(int), 1, fpB);
     fwrite(&ncol, sizeof(int), 1, fpB);
@@ -150,17 +150,15 @@ int segment_image(char* thrStr, char* file, char* segFile)
     if (fp == NULL)
         return INVALID_FILE;
 
-    FILE *segFp;
-    segFp = fopen(segFile,"wb");
-    if (segFp == NULL)
-        return INVALID_FILE;
-
     int thr = atoi(thrStr);
     int v, val, nrows, ncols;
-    fread(&nrows,sizeof(int),1,fp); fwrite(&nrows,sizeof(int),1,segFp);
-    fread(&ncols,sizeof(int),1,fp); fwrite(&ncols,sizeof(int),1,segFp);
+    fread(&nrows,sizeof(int),1,fp);
+    fread(&ncols,sizeof(int),1,fp);
 
-    printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
+    TMat2D* mat;
+    mat = mat2D_create(nrows,ncols);
+
+    //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
 
     for (int i = 0; i < nrows; i++)
     {
@@ -171,13 +169,14 @@ int segment_image(char* thrStr, char* file, char* segFile)
             if(v>=thr) val = 1;
             else val = 0;    
             
-            fwrite(&val, sizeof(int), 1, segFp);
-
-        } printf("\n");		
+            mat2D_set_value(mat,i,j,val);
+        }	
     }
 
+    write_bin(segFile, mat);
     fclose(fp);
-    fclose(segFp);
+
+    return SUCCESS;
 }
 
 int segfile(char* texto, char* binario)

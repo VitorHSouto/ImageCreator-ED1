@@ -10,16 +10,11 @@ int open_file(char* arg)
     if(strlen(arg) <= 4)
         return INVALID_FILE;
 
-    FILE *fp;
-
     int length = strlen(arg)-3;
 
     if(arg[length]=='t')
     {
-        fp = fopen(arg,"r+");
-        if (fp == NULL)
-            return INVALID_FILE;
-        show_image(&fp);
+        show_image(arg);
     }
     else if(arg[length]=='i')
     {
@@ -33,13 +28,8 @@ int open_file(char* arg)
 
 int convert_file(char* texto, char* binario)
 {
-    FILE *fpT;
-    fpT = fopen(texto,"r+");
-        if (fpT == NULL)
-            return INVALID_FILE;
-
     TMat2D* mat;
-    mat = image_create(&fpT);
+    mat = image_create(texto);
     if(mat==NULL)
         return INVALID_NULL_POINTER;
 
@@ -49,17 +39,21 @@ int convert_file(char* texto, char* binario)
     //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncol);
 
     write_bin(binario,mat);
-    fclose(fpT);
 
     return SUCCESS;    
 }
 
-TMat2D* image_create(FILE **fp)
+TMat2D* image_create(char* arg)
 {
+    FILE *fp;
+    fp = fopen(arg,"r+");
+        if (fp == NULL)
+            return NULL;
+
     int nrows = 0, ncol = 0, val;
     char c;
     
-    while((c = fgetc(*fp)) != EOF) //PEGA NMR DE LINHAS E COLUNAS
+    while((c = fgetc(fp)) != EOF) //PEGA NMR DE LINHAS E COLUNAS
     {
         if(c=='\n')
         {
@@ -73,14 +67,14 @@ TMat2D* image_create(FILE **fp)
 
     TMat2D* mat;
     mat = mat2D_create(nrows,ncol);
-    rewind(*fp);
+    rewind(fp);
 
-    while(!feof(*fp)) {
+    while(!feof(fp)) {
         for (int i = 0; i < nrows; i++)
         {
             for (int j = 0; j < ncol; j++)
             {
-                fscanf(*fp,"%d",&val);
+                fscanf(fp,"%d",&val);
                 //printf("Linha: %d, Coluna: %d, Valor: %d\n", i,j,val);
                 mat2D_set_value(mat,i,j,val);
             }
@@ -91,9 +85,9 @@ TMat2D* image_create(FILE **fp)
     return mat;
 }
 
-int show_image(FILE **fp)
+int show_image(char* arg)
 {
-    TMat2D* mat = image_create(fp);
+    TMat2D* mat = image_create(arg);
     if(mat==NULL)
         return INVALID_NULL_POINTER;
 
@@ -314,15 +308,10 @@ int write_bin(char* arg, TMat2D* mat)
 
 int labfile(char* text, char* res)
 {
-    FILE *fp;
-    fp = fopen(text,"r+");
-    if (fp == NULL)
-        return INVALID_FILE;
-
     int v, val, val_root, nrows, ncols;
 
     TMat2D* im;
-    im = image_create(&fp);
+    im = image_create(text);
     if(im==NULL)
         return INVALID_NULL_POINTER;
     mat2D_info(im,&nrows,&ncols);
@@ -450,7 +439,6 @@ int labfile(char* text, char* res)
     }
 
     write_txt(res,im_root);
-    fclose(fp);
 
     return SUCCESS;
 }
@@ -482,7 +470,7 @@ int write_txt(char* arg, TMat2D* mat)
         }fprintf(segFp, "\n");
     }
 
-    mat2D_print(mat);
+    //mat2D_print(mat);
     fclose(segFp);
 
 }

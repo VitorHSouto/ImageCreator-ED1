@@ -4,8 +4,8 @@
 #include "TMat2D.h"
 
 int open_file(char* arg);
-int show_image(FILE **fp);
-TMat2D* image_create(FILE **fp);
+int show_image(char* arg);
+TMat2D* image_create(char* arg);
 int convert_file(char* texto, char* binario);
 int show_image_bin(char* arg);
 int segment_image(char* thr, char* file, char* segFile);

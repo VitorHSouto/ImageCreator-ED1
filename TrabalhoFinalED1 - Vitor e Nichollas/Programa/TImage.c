@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "TImage.h"
+#include "TQueue.h"
 
 int open_file(char* arg)
 {
@@ -176,4 +177,135 @@ int segment_image(char* thrStr, char* file, char* segFile)
 
     fclose(fp);
     fclose(segFp);
+}
+
+int segfile(char* texto, char* binario)
+{
+    FILE *fp;
+    fp = fopen(texto,"r+");
+    if (fp == NULL)
+        return INVALID_FILE;
+
+    int v, val, nrows, ncols;
+
+    TMat2D* im;
+    im = image_create(&fp);
+    if(im==NULL)
+        return INVALID_NULL_POINTER;
+    mat2D_info(im,&nrows,&ncols);
+
+    //printf("\nLinhas: %d, Colunas: %d\n", nrows, ncols);
+
+    TMat2D* im_root;
+    im_root = mat2D_create(nrows,ncols);
+
+    TQueue* lista_proximos;
+    lista_proximos = queue_create();
+
+    ponto p, p_atual;
+    int val_im, val_im_root;
+    int label=1;
+
+    for (int i = 1; i < nrows-1; i++)
+    {
+        for (int j = 0; j < ncols-1; j++)
+        {
+            p.x = i;
+            p.y = j;
+            mat2D_get_value(im, p.x, p.y, &val_im);
+            mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+            if(val_im==1 && val_im_root==0)
+            {
+                mat2D_set_value(im_root, p.x, p.y, label);
+                queue_push(lista_proximos,p);
+
+                while (!queue_empty(lista_proximos))
+                {
+                    queue_top(lista_proximos,&p_atual);
+                    queue_pop(lista_proximos);
+
+                    //////////////////////////////
+                    p.x = p_atual.x - 1;
+                    p.y = p_atual.y;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 1 && val_im_root==0)
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, label);
+                        queue_push(lista_proximos,p);
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x + 1;
+                    p.y = p_atual.y;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 1 && val_im_root==0)
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, label);
+                        queue_push(lista_proximos,p);
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x;
+                    p.y = p_atual.y - 1;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 1 && val_im_root==0)
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, label);
+                        queue_push(lista_proximos,p);
+                    }
+
+                    //////////////////////////////
+                    p.x = p_atual.x;
+                    p.y = p_atual.y + 1;
+                    mat2D_get_value(im, p.x, p.y, &val_im);
+                    mat2D_get_value(im_root, p.x, p.y, &val_im_root);
+                    if(val_im == 1 && val_im_root==0)
+                    {
+                        mat2D_set_value(im_root, p.x, p.y, label);
+                        queue_push(lista_proximos,p);
+                    }
+                }
+                label += 1; 
+            }
+        } 
+    }
+
+    write_bin(binario,im_root);
+    fclose(fp);
+
+    return SUCCESS;
+}
+
+int write_bin(char* arg, TMat2D* mat)
+{
+    if(mat==NULL)
+        return INVALID_NULL_POINTER;
+
+    FILE *segFp;
+    segFp = fopen(arg,"wb");
+    if (segFp == NULL)
+        return INVALID_FILE;
+
+    int val, nrows, ncols;
+
+    mat2D_info(mat,&nrows,&ncols);
+
+    fwrite(&nrows,sizeof(int),1,segFp);
+    fwrite(&ncols,sizeof(int),1,segFp);
+
+    for(int a = 0; a<nrows; a++)
+    {
+        for (int b = 0; b<ncols; b++)
+        {
+            mat2D_get_value(mat,a,b,&val);
+            fwrite(&val, sizeof(int), 1, segFp);
+        }
+    }
+
+    fclose(segFp);
+
+    return SUCCESS;
 }
